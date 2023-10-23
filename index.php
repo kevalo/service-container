@@ -7,23 +7,30 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Container;
 
+//bind to a class
+Container::bind(Model::class, Payment::class);
+$model = Container::make(Model::class);
+dump($model);
+
 //bind to callable
 Container::bind(User::class, function(){
-    return new User('user_payment');
+    $user = Container::resolve(User::class);
+    $user->table = 'users';
+    return $user;
 });
 $user = Container::make(User::class);
-var_dump($user->table);
-var_dump($user->all());
-
-//bind to another class
-Container::bind(Model::class, Payment::class);
-$user = Container::make(Model::class);
-var_dump($user->all());
+dump($user);
 
 //use as a singleton
-Container::singleton(User::class);
-$user = Container::make(User::class);
-var_dump(spl_object_id($user));
+Container::singleton(Payment::class);
+$payment1 = Container::make(Payment::class);
+$payment1->table = "payments";
 
-$user = Container::make(User::class);
-var_dump(spl_object_id($user));
+$payment2 = Container::make(Payment::class);
+dump($payment1, $payment2);
+
+function dump(...$vars): void
+{
+    var_dump(...$vars);
+    echo "---------------------------------------------\n";
+}

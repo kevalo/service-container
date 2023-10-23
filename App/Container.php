@@ -7,34 +7,46 @@ class Container
     private static array $binds = [];
     private static array $singletons = [];
 
-    public static function bind(string $class, string|callable $returnClass, bool $singleton = false): void
+    /**
+     * Assigns a class to be resolved as another or as a callable.
+     */
+    public static function bind(string $class, string|callable $resolve): void
     {
-        self::$binds[$class] = ['class' => $returnClass, 'singleton' => $singleton];
+        self::$binds[$class] = ['resolve' => $resolve, 'singleton' => false];
     }
 
+    /**
+     * Assigns a class to be used as a singleton.
+     */
     public static function singleton(string $class): void
     {
-        self::bind($class, $class, true);
+        self::$binds[$class] = ['resolve' => $class, 'singleton' => true];
     }
 
+    /**
+     * Resolves the class by checking if it is assigned to a bind or is a singleton.
+     */
     public static function make(string $class)
     {
-        $resolveClass = $class;
+        $resolve = $class;
         $singleton = false;
 
         if (isset(self::$binds[$class])) {
-            $resolveClass = self::$binds[$class]['class'];
+            $resolve = self::$binds[$class]['resolve'];
             $singleton = self::$binds[$class]['singleton'];
         }
 
         if ($singleton) {
-            return self::resolveSingleton($resolveClass);
+            return self::resolveSingleton($resolve);
         }
 
-        return self::resolve($resolveClass);
+        return self::resolve($resolve);
     }
 
-    private static function resolveSingleton(string $class)
+    /**
+     * Return the current instance or create and save a new one
+     */
+    public static function resolveSingleton(string $class)
     {
         if (isset(self::$singletons[$class])) {
             return self::$singletons[$class];
@@ -49,7 +61,10 @@ class Container
         return null;
     }
 
-    private static function resolve(string|callable $arg)
+    /**
+     * Return a new class instance or the result of the callable
+     */
+    public static function resolve(string|callable $arg)
     {
         if (is_callable($arg)) {
             return $arg();
