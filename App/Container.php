@@ -18,9 +18,9 @@ class Container
     /**
      * Assigns a class to be used as a singleton.
      */
-    public static function singleton(string $class): void
+    public static function singleton(string $class, string|callable $resolve): void
     {
-        self::$binds[$class] = ['resolve' => $class, 'singleton' => true];
+        self::$binds[$class] = ['resolve' => $resolve, 'singleton' => true];
     }
 
     /**
@@ -52,8 +52,9 @@ class Container
             return self::$singletons[$class];
         }
 
-        if (class_exists($class)) {
-            $instance = new $class();
+        $instance = self::resolve($class);
+
+        if ($instance) {
             self::$singletons[$class] = $instance;
             return $instance;
         }

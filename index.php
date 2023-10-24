@@ -22,7 +22,7 @@ $user = Container::make(User::class);
 dump($user);
 
 //use as a singleton
-Container::singleton(Payment::class);
+Container::singleton(Payment::class, User::class);
 $payment1 = Container::make(Payment::class);
 $payment1->table = "payments";
 
